@@ -1,49 +1,47 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useMemo } from "react"
-import HouseCard from "@/components/house-card"
-import { getAllHouses } from "@/lib/sanity-queries"
+import { useState, useMemo } from "react";
+import HouseCard from "@/components/house-card";
 
 interface House {
-  _id: string
-  title: string
-  slug: { current: string }
-  price: number
-  size: number
-  bedrooms: number
-  bathrooms: number
-  mainImage: any
+  _id: string;
+  title: string;
+  slug: { current: string };
+  price: number;
+  size: number;
+  bedrooms: number;
+  bathrooms: number;
+  mainImage: any;
 }
 
-export default function HousesClient() {
-  const [houses, setHouses] = useState<House[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [priceRange, setPriceRange] = useState([0, 1000000])
-  const [sizeRange, setSizeRange] = useState([0, 500])
-  const [sortBy, setSortBy] = useState("newest")
+interface Props {
+  initialHouses: House[];
+}
 
-  useEffect(() => {
-    async function loadHouses() {
-      try {
-        const data = await getAllHouses()
-        setHouses(data)
+export default function HousesClient({ initialHouses }: Props) {
+  // use server-provided initial data instead of fetching from the client.
+  const [houses, setHouses] = useState<House[]>(initialHouses || []);
+  const [isLoading, setIsLoading] = useState(false);
 
-        // Calculate price and size ranges
-        if (data.length > 0) {
-          const prices = data.map((h: House) => h.price)
-          const sizes = data.map((h: House) => h.size)
-          setPriceRange([Math.min(...prices), Math.max(...prices)])
-          setSizeRange([Math.min(...sizes), Math.max(...sizes)])
-        }
-      } catch (error) {
-        console.error("Error loading houses:", error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  // derive sensible default ranges from initial data
+  const initialPrices =
+    initialHouses && initialHouses.length > 0
+      ? initialHouses.map((h) => h.price)
+      : [0, 1000000];
+  const initialSizes =
+    initialHouses && initialHouses.length > 0
+      ? initialHouses.map((h) => h.size)
+      : [0, 500];
 
-    loadHouses()
-  }, [])
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    Math.min(...initialPrices),
+    Math.max(...initialPrices),
+  ]);
+  const [sizeRange, setSizeRange] = useState<[number, number]>([
+    Math.min(...initialSizes),
+    Math.max(...initialSizes),
+  ]);
+  const [sortBy, setSortBy] = useState("newest");
 
   const filteredAndSortedHouses = useMemo(() => {
     const filtered = houses.filter(
@@ -51,32 +49,36 @@ export default function HousesClient() {
         house.price >= priceRange[0] &&
         house.price <= priceRange[1] &&
         house.size >= sizeRange[0] &&
-        house.size <= sizeRange[1],
-    )
+        house.size <= sizeRange[1]
+    );
 
     // Sort
     if (sortBy === "price-low") {
-      filtered.sort((a, b) => a.price - b.price)
+      filtered.sort((a, b) => a.price - b.price);
     } else if (sortBy === "price-high") {
-      filtered.sort((a, b) => b.price - a.price)
+      filtered.sort((a, b) => b.price - a.price);
     } else if (sortBy === "size-small") {
-      filtered.sort((a, b) => a.size - b.size)
+      filtered.sort((a, b) => a.size - b.size);
     } else if (sortBy === "size-large") {
-      filtered.sort((a, b) => b.size - a.size)
+      filtered.sort((a, b) => b.size - a.size);
     } else if (sortBy === "newest") {
       // Default - already sorted by Sanity query
     }
 
-    return filtered
-  }, [houses, priceRange, sizeRange, sortBy])
+    return filtered;
+  }, [houses, priceRange, sizeRange, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">Koleksi Rumah Kayu</h1>
-          <p className="text-foreground/70">Temukan rumah impian Anda di Desa Lembah Indah</p>
+          <h1 className="text-4xl font-bold text-primary mb-2">
+            Koleksi Rumah Kayu
+          </h1>
+          <p className="text-foreground/70">
+            Temukan rumah impian Anda di Desa Lembah Indah
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -87,7 +89,9 @@ export default function HousesClient() {
 
               {/* Sort */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-foreground mb-2">Urutkan</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Urutkan
+                </label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -103,13 +107,17 @@ export default function HousesClient() {
 
               {/* Price Filter */}
               <div className="mb-6 pb-6 border-b border-border">
-                <label className="block text-sm font-semibold text-foreground mb-2">Rentang Harga (USD)</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Rentang Harga (USD)
+                </label>
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <input
                       type="number"
                       value={priceRange[0]}
-                      onChange={(e) => setPriceRange([Number.parseInt(e.target.value) || 0, priceRange[1]])}
+                      onChange={(e) =>
+                        setPriceRange([Number(e.target.value) || 0, priceRange[1]])
+                      }
                       className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Min"
                     />
@@ -117,17 +125,21 @@ export default function HousesClient() {
                     <input
                       type="number"
                       value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value) || 0])}
+                      onChange={(e) =>
+                        setPriceRange([priceRange[0], Number(e.target.value) || 0])
+                      }
                       className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Max"
                     />
                   </div>
                   <input
                     type="range"
-                    min={0}
-                    max={1000000}
+                    min={Math.min(...initialPrices)}
+                    max={Math.max(...initialPrices)}
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
+                    onChange={(e) =>
+                      setPriceRange([priceRange[0], Number(e.target.value)])
+                    }
                     className="w-full"
                   />
                 </div>
@@ -135,13 +147,17 @@ export default function HousesClient() {
 
               {/* Size Filter */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-foreground mb-2">Rentang Ukuran (m²)</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">
+                  Rentang Ukuran (m²)
+                </label>
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <input
                       type="number"
                       value={sizeRange[0]}
-                      onChange={(e) => setSizeRange([Number.parseInt(e.target.value) || 0, sizeRange[1]])}
+                      onChange={(e) =>
+                        setSizeRange([Number(e.target.value) || 0, sizeRange[1]])
+                      }
                       className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Min"
                     />
@@ -149,17 +165,21 @@ export default function HousesClient() {
                     <input
                       type="number"
                       value={sizeRange[1]}
-                      onChange={(e) => setSizeRange([sizeRange[0], Number.parseInt(e.target.value) || 0])}
+                      onChange={(e) =>
+                        setSizeRange([sizeRange[0], Number(e.target.value) || 0])
+                      }
                       className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder="Max"
                     />
                   </div>
                   <input
                     type="range"
-                    min={0}
-                    max={500}
+                    min={Math.min(...initialSizes)}
+                    max={Math.max(...initialSizes)}
                     value={sizeRange[1]}
-                    onChange={(e) => setSizeRange([sizeRange[0], Number.parseInt(e.target.value)])}
+                    onChange={(e) =>
+                      setSizeRange([sizeRange[0], Number(e.target.value)])
+                    }
                     className="w-full"
                   />
                 </div>
@@ -168,9 +188,9 @@ export default function HousesClient() {
               {/* Reset Filters */}
               <button
                 onClick={() => {
-                  setSortBy("newest")
-                  setPriceRange([0, 1000000])
-                  setSizeRange([0, 500])
+                  setSortBy("newest");
+                  setPriceRange([Math.min(...initialPrices), Math.max(...initialPrices)]);
+                  setSizeRange([Math.min(...initialSizes), Math.max(...initialSizes)]);
                 }}
                 className="w-full px-4 py-2 rounded border border-primary text-primary hover:bg-primary hover:text-card transition-colors text-sm font-semibold"
               >
@@ -187,12 +207,15 @@ export default function HousesClient() {
               </div>
             ) : filteredAndSortedHouses.length === 0 ? (
               <div className="flex items-center justify-center min-h-96">
-                <p className="text-foreground/60">Tidak ada rumah yang sesuai dengan filter Anda.</p>
+                <p className="text-foreground/60">
+                  Tidak ada rumah yang sesuai dengan filter Anda.
+                </p>
               </div>
             ) : (
               <>
                 <p className="text-sm text-foreground/70 mb-6">
-                  Menampilkan {filteredAndSortedHouses.length} dari {houses.length} rumah
+                  Menampilkan {filteredAndSortedHouses.length} dari{" "}
+                  {houses.length} rumah
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {filteredAndSortedHouses.map((house) => (
@@ -205,5 +228,5 @@ export default function HousesClient() {
         </div>
       </div>
     </div>
-  )
+  );
 }
