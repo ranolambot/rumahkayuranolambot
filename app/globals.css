@@ -205,6 +205,19 @@
     animation: scaleIn 0.3s ease-out;
   }
 
+  /* Add fadeInLeft and fadeInRight animations for process section */
+  .animate-fadeInLeft {
+    animation: slideInLeft 0.6s ease-out;
+  }
+
+  .animate-fadeInRight {
+    animation: slideInRight 0.6s ease-out;
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-300 hover:scale-105;
+  }
+
   .transition-smooth {
     @apply transition-all duration-300 ease-out;
   }

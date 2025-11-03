@@ -125,7 +125,7 @@ export default function HouseDetailClient({ house }: Props) {
                   {house.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <svg
-                        className="w-5 h-5 text-secondary mt-0.5 flex-shrink-0"
+                        className="w-5 h-5 text-secondary mt-0.5 shrink-0"
                         fill="currentColor"
                         viewBox="0 0 20 20"
                       >
@@ -193,17 +193,6 @@ export default function HouseDetailClient({ house }: Props) {
                     <p className="text-foreground font-semibold">
                       {house.seller.name}
                     </p>
-                  </div>
-                  <div>
-                    <p className="text-foreground/70 text-xs font-semibold mb-1">
-                      TELEPON
-                    </p>
-                    <a
-                      href={`tel:${house.seller.phone}`}
-                      className="text-primary hover:text-secondary transition-colors"
-                    >
-                      {house.seller.phone}
-                    </a>
                   </div>
                   {house.seller.whatsapp && (
                     <div>
