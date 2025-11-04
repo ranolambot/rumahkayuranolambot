@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import useSWR from "swr";
 import HouseCard from "@/components/house-card";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 interface House {
   _id: string;
@@ -14,43 +17,23 @@ interface House {
   mainImage: any;
 }
 
-interface Props {
-  initialHouses: House[];
-}
+export default function HousesClient() {
+  const {
+    data: houses = [],
+    isLoading,
+    error,
+  } = useSWR("/api/houses", fetcher);
 
-export default function HousesClient({ initialHouses }: Props) {
-  // use server-provided initial data instead of fetching from the client.
-  const [houses, setHouses] = useState<House[]>(initialHouses || []);
-  const [isLoading, setIsLoading] = useState(false);
+  if (typeof window !== "undefined") {
+    console.log("[v0] Houses data:", houses);
+    console.log("[v0] Loading:", isLoading);
+    console.log("[v0] Error:", error);
+  }
 
-  // derive sensible default ranges from initial data
-  const initialPrices =
-    initialHouses && initialHouses.length > 0
-      ? initialHouses.map((h) => h.price)
-      : [0, 1000000];
-  const initialSizes =
-    initialHouses && initialHouses.length > 0
-      ? initialHouses.map((h) => h.size)
-      : [0, 500];
-
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    Math.min(...initialPrices),
-    Math.max(...initialPrices),
-  ]);
-  const [sizeRange, setSizeRange] = useState<[number, number]>([
-    Math.min(...initialSizes),
-    Math.max(...initialSizes),
-  ]);
   const [sortBy, setSortBy] = useState("newest");
 
   const filteredAndSortedHouses = useMemo(() => {
-    const filtered = houses.filter(
-      (house) =>
-        house.price >= priceRange[0] &&
-        house.price <= priceRange[1] &&
-        house.size >= sizeRange[0] &&
-        house.size <= sizeRange[1]
-    );
+    const filtered = houses;
 
     // Sort
     if (sortBy === "price-low") {
@@ -66,7 +49,7 @@ export default function HousesClient({ initialHouses }: Props) {
     }
 
     return filtered;
-  }, [houses, priceRange, sizeRange, sortBy]);
+  }, [houses, sortBy]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -104,98 +87,6 @@ export default function HousesClient({ initialHouses }: Props) {
                   <option value="size-large">Ukuran: Terbesar</option>
                 </select>
               </div>
-
-              {/* Price Filter */}
-              <div className="mb-6 pb-6 border-b border-border">
-                <label className="block text-sm font-semibold text-foreground mb-2">
-                  Rentang Harga (USD)
-                </label>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={priceRange[0]}
-                      onChange={(e) =>
-                        setPriceRange([Number(e.target.value) || 0, priceRange[1]])
-                      }
-                      className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Min"
-                    />
-                    <span className="py-1">-</span>
-                    <input
-                      type="number"
-                      value={priceRange[1]}
-                      onChange={(e) =>
-                        setPriceRange([priceRange[0], Number(e.target.value) || 0])
-                      }
-                      className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Max"
-                    />
-                  </div>
-                  <input
-                    type="range"
-                    min={Math.min(...initialPrices)}
-                    max={Math.max(...initialPrices)}
-                    value={priceRange[1]}
-                    onChange={(e) =>
-                      setPriceRange([priceRange[0], Number(e.target.value)])
-                    }
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Size Filter */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-foreground mb-2">
-                  Rentang Ukuran (m²)
-                </label>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={sizeRange[0]}
-                      onChange={(e) =>
-                        setSizeRange([Number(e.target.value) || 0, sizeRange[1]])
-                      }
-                      className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Min"
-                    />
-                    <span className="py-1">-</span>
-                    <input
-                      type="number"
-                      value={sizeRange[1]}
-                      onChange={(e) =>
-                        setSizeRange([sizeRange[0], Number(e.target.value) || 0])
-                      }
-                      className="w-full px-2 py-1 border border-border rounded text-sm bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      placeholder="Max"
-                    />
-                  </div>
-                  <input
-                    type="range"
-                    min={Math.min(...initialSizes)}
-                    max={Math.max(...initialSizes)}
-                    value={sizeRange[1]}
-                    onChange={(e) =>
-                      setSizeRange([sizeRange[0], Number(e.target.value)])
-                    }
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Reset Filters */}
-              <button
-                onClick={() => {
-                  setSortBy("newest");
-                  setPriceRange([Math.min(...initialPrices), Math.max(...initialPrices)]);
-                  setSizeRange([Math.min(...initialSizes), Math.max(...initialSizes)]);
-                }}
-                className="w-full px-4 py-2 rounded border border-primary text-primary hover:bg-primary hover:text-card transition-colors text-sm font-semibold"
-              >
-                Reset Filter
-              </button>
             </div>
           </aside>
 
@@ -204,6 +95,12 @@ export default function HousesClient({ initialHouses }: Props) {
             {isLoading ? (
               <div className="flex items-center justify-center min-h-96">
                 <p className="text-foreground/60">Memuat rumah...</p>
+              </div>
+            ) : error ? (
+              <div className="flex items-center justify-center min-h-96">
+                <p className="text-foreground/60">
+                  Gagal memuat rumah. Silakan coba lagi.
+                </p>
               </div>
             ) : filteredAndSortedHouses.length === 0 ? (
               <div className="flex items-center justify-center min-h-96">

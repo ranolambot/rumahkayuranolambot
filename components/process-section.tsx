@@ -8,35 +8,35 @@ const PROCESS_STEPS = [
     title: "Desain & Perencanaan",
     description:
       "Kami merancang setiap detail dengan cermat untuk memastikan desain yang memukau dan fungsional sesuai kebutuhan Anda.",
-    image: "/wooden-house-architectural-design-planning-bluepri.jpg",
+    image: "/desain-perencanaan.jpg",
   },
   {
     id: 2,
     title: "Pemilihan Kayu",
     description:
       "Kami memilih kayu terbaik dari hutan yang dikelola secara berkelanjutan untuk kualitas dan ketahanan maksimal.",
-    image: "/sustainable-wood-selection-timber-quality.jpg",
+    image: "/pemilihan-kayu.jpg",
   },
   {
     id: 3,
     title: "Proses Konstruksi",
     description:
       "Pengrajin berpengalaman kami membangun rumah dengan teknik tradisional dan teknologi modern untuk hasil sempurna.",
-    image: "/wooden-house-construction-craftsmanship-process.jpg",
+    image: "/proses-konstruksi.jpg",
   },
   {
     id: 4,
     title: "Finishing & Detail",
     description:
       "Kami menyelesaikan setiap detail dengan perhatian penuh untuk memastikan rumah Anda siap dan sempurna.",
-    image: "/wooden-house-finishing-details-interior-design.jpg",
+    image: "/finishing-detail.jpg",
   },
   {
     id: 5,
     title: "Serah Terima",
     description:
       "Rumah Anda siap dihuni dengan sertifikat kualitas dan garansi komprehensif untuk ketenangan pikiran Anda.",
-    image: "/wooden-house-handover-delivery-ready-to-live.jpg",
+    image: "/serah-terima.jpg",
   },
 ];
 
